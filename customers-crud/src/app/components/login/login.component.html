@@ -1,0 +1,11 @@
+<div class="mainContainer">
+    <div class="inputItem">
+        <div><label for="username">Email</label></div> <br>
+        <input pInputText id="username" aria-describedby="username-help" [(ngModel)]="username" />
+    </div>
+    <div class="inputItem">
+      <div><label for="password">Password</label></div> <br>
+      <p-password id="password" [(ngModel)]="password" [toggleMask]="true"></p-password>
+    </div>
+    <p-button label="Login" icon="pi pi-user" [loading]="isLoading" (onClick)="login()"></p-button>
+</div>

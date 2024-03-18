@@ -1,0 +1,127 @@
+<div>
+  <div class="topBar">
+    <div class="buttonsContainer">
+      <p-button type="button" icon="pi pi-plus" styleClass="p-button-text" (onClick)="addCustomerPopup()" title="Add a new customer"></p-button>
+      <p-button type="button" icon="pi pi-pencil" styleClass="p-button-text" [disabled]="!selectedCustomer" (onClick)="editCustomerPopup()" title="Edit selected customer"></p-button>
+      <p-button type="button" icon="pi pi-trash" styleClass="p-button-text" [disabled]="!selectedCustomer" (onClick)="deleteCustomer()" title="Delete selected customer"></p-button>
+      <p-button type="button" icon="pi pi-file" styleClass="p-button-text" [disabled]="!selectedCustomer" (onClick)="viewInvoicesPopup()" title="Show invoices of the selected customer"></p-button>
+    </div>
+    <div class="searchBarContainer" title="Search customers by company name (in this page)">
+      <div class="searchBar">
+        <span class="p-input-icon-left">
+          <i class="pi pi-search"></i>
+          <input type="text" pInputText [(ngModel)]="searchString" (ngModelChange)="filterTable()"/>
+        </span>
+      </div>
+    </div>
+  </div>
+  <div class="tableContainer" *ngIf="loadTable">
+    <p-table
+    [value]="customers"
+    [loading]="loading"
+    [paginator]="true"
+    [rows]="12"
+    [lazy]="true"
+    [totalRecords]="totalRows"
+    (onPage)="pageChange($event)"
+    styleClass="p-datatable-striped"
+    selectionMode="single" [(selection)]="selectedCustomer" dataKey="id"
+    [showCurrentPageReport]="true"
+    [tableStyle]="{ 'min-width': '50rem' }"
+    currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
+    >
+      <ng-template pTemplate="header">
+          <tr>
+              <th style="width:25%">Company Name</th>
+              <th style="width:25%">Address</th>
+              <th style="width:25%">Subscription State</th>
+              <th style="width:25%">Number Of Invoices</th>
+          </tr>
+      </ng-template>
+      <ng-template pTemplate="body" let-customer>
+          <tr [pSelectableRow]="customer">
+              <td>{{ customer.companyName }}</td>
+              <td>{{ customer.address }}, {{ customer.state }}, {{ customer.country }}</td>
+              <td>{{ customer.subscriptionState }}</td>
+              <td>{{ customer.numberOfInvoices }}</td>
+          </tr>
+      </ng-template>
+    </p-table>
+  </div>
+</div>
+
+<!--Edit Customer-->
+<p-dialog header="Edit Customer" [(visible)]="showCustomerDetail" [modal]="true" [draggable]="false" [resizable]="false" (onHide)="this.changes=[];">
+  <div class="customerInfoContainer" *ngIf="showCustomerDetail">
+    <label for="companyName">Company Name</label>
+    <input pInputText class="customerInput" id="companyName" [(ngModel)]="customerCopy.companyName" (ngModelChange)="addItemToChanges('companyName')">
+    <label for="address">Address</label>
+    <input pInputText class="customerInput" id="address" [(ngModel)]="customerCopy.address" (ngModelChange)="addItemToChanges('address')">
+    <label for="state">State</label>
+    <input pInputText class="customerInput" id="state" [(ngModel)]="customerCopy.state" (ngModelChange)="addItemToChanges('state')">
+    <label for="country">Country</label>
+    <input pInputText class="customerInput" id="country" [(ngModel)]="customerCopy.country" (ngModelChange)="addItemToChanges('country')">
+    <label for="subscriptionS">Subscription State</label>
+    <input pInputText class="customerInput" id="subscriptionS" [(ngModel)]="customerCopy.subscriptionState" [disabled]="true">
+    <div class="buttonContainer">
+      <p-button id="saveButton" icon="pi pi-save" [disabled]="this.changes.length == 0" title="Save" (onClick)="saveCustomerChanges()"></p-button>
+    </div>
+</div>
+</p-dialog>
+
+<!--New Customer-->
+<p-dialog header="New Customer" [(visible)]="showNewCustomerDetail" [modal]="true" [draggable]="false" [resizable]="false" (onHide)="this.changes=[];">
+  <div class="customerInfoContainer" *ngIf="showNewCustomerDetail">
+    <label for="subscriptionState">SubscriptionState</label>
+    <p-dropdown
+        id="subscriptionState"
+        [options]="subscriptionStates"
+        optionLabel="code"
+        optionValue="id"
+        [(ngModel)]="newCustomer.subscriptionState"
+        [placeholder]="newCustomer.subscriptionState ?? 'Select status'"
+        (ngModelChange)="addItemToChanges('subscriptionState', true)"
+      ></p-dropdown>
+    <label for="companyName">Company Name</label>
+    <input pInputText class="customerInput" id="companyName" [(ngModel)]="newCustomer.companyName" (ngModelChange)="addItemToChanges('companyName', true)">
+    <label for="address">Address</label>
+    <input pInputText class="customerInput" id="address" [(ngModel)]="newCustomer.address" (ngModelChange)="addItemToChanges('address', true)">
+    <label for="state">State</label>
+    <input pInputText class="customerInput" id="state" [(ngModel)]="newCustomer.state" (ngModelChange)="addItemToChanges('state', true)">
+    <label for="country">Country</label>
+    <input pInputText class="customerInput" id="country" [(ngModel)]="newCustomer.country" (ngModelChange)="addItemToChanges('country', true)">
+    <div class="buttonContainer">
+      <p-button id="saveButton" icon="pi pi-save" [disabled]="this.changes.length < 5" title="Save" (onClick)="addNewCustomer()"></p-button>
+    </div>
+</div>
+</p-dialog>
+
+<!--Invoices detail-->
+<p-dialog header="Invoices detail" [(visible)]="showInvoiceDetail" [modal]="true" [draggable]="false" [resizable]="false">
+  <div class="tableContainer" *ngIf="showInvoiceDetail">
+    <p-table
+    [value]="invoices"
+    [paginator]="true"
+    [rows]="5"
+    styleClass="p-datatable-striped"
+    [showCurrentPageReport]="true"
+    [tableStyle]="{ 'min-width': '50rem' }"
+    currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
+    >
+      <ng-template pTemplate="header">
+          <tr>
+              <th style="width:33%">Invoice number</th>
+              <th style="width:33%">Date</th>
+              <th style="width:33%">Total</th>
+          </tr>
+      </ng-template>
+      <ng-template pTemplate="body" let-invoice>
+          <tr>
+              <td>{{ invoice.invoiceNumber }}</td>
+              <td>{{ invoice.date | date:'dd/MM/yyyy' }}</td>
+              <td>{{ invoice.total }}</td>
+          </tr>
+      </ng-template>
+    </p-table>
+  </div>
+</p-dialog>
