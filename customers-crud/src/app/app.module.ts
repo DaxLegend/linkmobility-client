@@ -37,17 +37,13 @@ import { HttpClientModule } from '@angular/common/http';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
 /**Componenti */
-import { CustomerDetailComponent } from './components/customer-detail/customer-detail.component';
 import { CustomersComponent } from './components/customers/customers.component';
-import { InvoiceDetailComponent } from './components/invoice-detail/invoice-detail.component';
 import { LoginComponent } from './components/login/login.component';
 
 @NgModule({
   declarations: [
     AppComponent,
-    CustomerDetailComponent,
     CustomersComponent,
-    InvoiceDetailComponent,
     LoginComponent
   ],
   imports: [
